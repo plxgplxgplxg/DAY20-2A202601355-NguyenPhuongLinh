@@ -20,6 +20,25 @@ class Settings(BaseSettings):
     openai_api_key: str | None = Field(default=None, validation_alias="OPENAI_API_KEY")
     openai_model: str = Field(default="gpt-4o-mini", validation_alias="OPENAI_MODEL")
 
+    mistral_api_key: str | None = Field(default=None, validation_alias="MISTRAL_API_KEY")
+    mistral_default_model: str = Field(
+        default="open-mistral-7b", validation_alias="MISTRAL_DEFAULT_MODEL"
+    )
+    mistral_supervisor_model: str = Field(
+        default="open-mixtral-8x7b", validation_alias="MISTRAL_SUPERVISOR_MODEL"
+    )
+    mistral_researcher_model: str = Field(
+        default="open-mistral-7b", validation_alias="MISTRAL_RESEARCHER_MODEL"
+    )
+    mistral_analyst_model: str = Field(
+        default="open-mixtral-8x7b",
+        validation_alias="MISTRAL_ANALYST_MODEL",
+    )
+    mistral_writer_model: str = Field(
+        default="open-mixtral-8x7b",
+        validation_alias="MISTRAL_WRITER_MODEL",
+    )
+
     langsmith_api_key: str | None = Field(default=None, validation_alias="LANGSMITH_API_KEY")
     langsmith_project: str = Field(
         default="multi-agent-research-lab", validation_alias="LANGSMITH_PROJECT"

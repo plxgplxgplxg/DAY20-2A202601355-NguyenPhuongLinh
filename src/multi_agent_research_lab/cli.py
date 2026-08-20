@@ -1,4 +1,4 @@
-"""Command-line entrypoint for the lab starter."""
+"""Command-line entrypoint for the lab system."""
 
 from typing import Annotated
 
@@ -9,12 +9,13 @@ from rich.panel import Panel
 
 from multi_agent_research_lab.core.config import get_settings
 from multi_agent_research_lab.core.errors import StudentTodoError
-from multi_agent_research_lab.core.schemas import ResearchQuery
+from multi_agent_research_lab.core.schemas import AgentName, AgentResult, ResearchQuery
 from multi_agent_research_lab.core.state import ResearchState
 from multi_agent_research_lab.graph.workflow import MultiAgentWorkflow
 from multi_agent_research_lab.observability.logging import configure_logging
+from multi_agent_research_lab.services.llm_client import LLMClient
 
-app = typer.Typer(help="Multi-Agent Research Lab starter CLI")
+app = typer.Typer(help="Multi-Agent Research Lab CLI")
 console = Console()
 
 
@@ -41,23 +42,36 @@ def _parse_query(query: str) -> ResearchQuery:
 def baseline(
     query: Annotated[str, typer.Option("--query", "-q", help="Research query")],
 ) -> None:
-    """Run a minimal single-agent baseline placeholder."""
+    """Run single-agent baseline using Mistral LLM."""
 
     _init()
     request = _parse_query(query)
     state = ResearchState(request=request)
-    state.final_answer = (
-        "Baseline skeleton response. TODO(student): replace this with a real single-agent "
-        "implementation and record latency/cost/quality metrics."
+
+    llm_client = LLMClient()
+    system_prompt = (
+        "You are an all-in-one AI research assistant. Given a research query, "
+        "directly conduct analysis, synthesize key findings, and produce a structured final answer."
     )
-    console.print(Panel.fit(state.final_answer, title="Single-Agent Baseline"))
+    res = llm_client.complete(system_prompt=system_prompt, user_prompt=query)
+
+    state.final_answer = res.content
+    state.agent_results.append(
+        AgentResult(
+            agent=AgentName.SUPERVISOR,
+            content=res.content,
+            metadata={"single_agent": True},
+        )
+    )
+
+    console.print(Panel.fit(state.final_answer, title="Single-Agent Baseline Result"))
 
 
 @app.command("multi-agent")
 def multi_agent(
     query: Annotated[str, typer.Option("--query", "-q", help="Research query")],
 ) -> None:
-    """Run the multi-agent workflow skeleton."""
+    """Run the multi-agent workflow."""
 
     _init()
     state = ResearchState(request=_parse_query(query))
